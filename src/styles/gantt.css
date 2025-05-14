@@ -1,0 +1,53 @@
+.gantt-chart-container {
+    position: relative;
+    height: 100%;
+    overflow: auto;
+  }
+  
+  .task-bar {
+    height: 20px;
+    border-radius: 4px;
+    padding: 2px 5px;
+    color: white;
+    font-size: 12px;
+    cursor: move;
+    user-select: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+  }
+  
+  .dependency-arrow {
+    position: absolute;
+    height: 2px;
+    background-color: #666;
+    z-index: 1;
+  }
+  
+  .dependency-arrow::after {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: -4px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid #666;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+  
+  .timeline-header {
+    display: flex;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  
+  .timeline-header-cell {
+    padding: 8px;
+    border-right: 1px solid #ddd;
+    text-align: center;
+    font-weight: bold;
+  }

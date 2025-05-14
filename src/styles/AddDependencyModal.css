@@ -1,0 +1,59 @@
+.dependency-modal .ant-modal-content {
+    border-radius: 8px;
+  }
+  
+  .dependency-info {
+    margin-bottom: 16px;
+  }
+  
+  .task-info {
+    display: flex;
+    margin-bottom: 8px;
+  }
+  
+  .task-info .label {
+    font-weight: 500;
+    width: 100px;
+    color: #666;
+  }
+  
+  .task-info .value {
+    flex: 1;
+    padding: 4px 8px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+  }
+  
+  .dependency-type {
+    margin-bottom: 16px;
+  }
+  
+  .dependency-type .label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #666;
+  }
+  
+  .dependency-help {
+    margin-top: 20px;
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+  }
+  
+  .dependency-help h4 {
+    margin-bottom: 8px;
+    color: #333;
+  }
+  
+  .dependency-help ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  
+  .dependency-help li {
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #555;
+  }

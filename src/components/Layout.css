@@ -1,0 +1,20 @@
+.layout {
+  min-height: 100vh;
+}
+
+.content {
+  margin: 24px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.content-wrapper {
+  min-height: 360px;
+}
+
+.footer {
+  text-align: center;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+}

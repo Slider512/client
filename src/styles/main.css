@@ -1,0 +1,48 @@
+.app-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .gantt-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .toolbar {
+    padding: 0.5rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .filters-panel {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 0;
+  }
+  
+  .gantt-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .gantt-chart-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+  }
+  
+  .gantt-grid {
+    position: relative;
+    flex: 1;
+    overflow: auto;
+  }

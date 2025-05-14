@@ -1,0 +1,69 @@
+.gantt-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 1.2rem;
+    color: #555;
+  }
+  
+  .gantt-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .gantt-chart-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    position: relative;
+  }
+  
+  /* ReactGrid custom styles */
+  .reactgrid {
+    flex: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .reactgrid-content {
+    background-color: #fff;
+  }
+  
+  .reactgrid-cell {
+    border-right: 1px solid #f0f0f0;
+  }
+  
+  .reactgrid-cell.header {
+    background-color: #f8f9fa;
+    font-weight: 600;
+  }
+  
+  /* Scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }

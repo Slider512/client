@@ -1,0 +1,39 @@
+.export-buttons {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+  }
+  
+  .export-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .export-button.excel {
+    background-color: #217346;
+    color: white;
+  }
+  
+  .export-button.excel:hover {
+    background-color: #1a5d38;
+  }
+  
+  .export-button.pdf {
+    background-color: #d33f49;
+    color: white;
+  }
+  
+  .export-button.pdf:hover {
+    background-color: #b3353d;
+  }
+  
+  .export-button svg {
+    width: 14px;
+    height: 14px;
+  }

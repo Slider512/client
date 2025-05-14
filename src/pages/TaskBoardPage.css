@@ -1,0 +1,32 @@
+.task-board-page {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.gantt-container-wrapper {
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fff;
+}
+
+.scrum-board-wrapper {
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  min-height: 500px;
+}
+
+.ant-tabs-nav {
+  margin-bottom: 24px;
+}
+
+.ant-tabs-tab {
+  padding: 12px 16px;
+}

@@ -1,0 +1,37 @@
+.recent-tasks-list-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.recent-tasks-error {
+  color: #f5222d;
+  padding: 16px;
+  text-align: center;
+}
+
+.recent-tasks-loading {
+  padding: 16px;
+  text-align: center;
+}
+
+.recent-tasks-list-container .ant-card-head {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.recent-tasks-list-container .ant-list-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.recent-tasks-list-container .ant-list-item:hover {
+  background-color: #f5f5f5;
+}
+
+.task-overdue {
+  background-color: #fff1f0 !important;
+}
+
+.task-overdue .ant-list-item-meta-title {
+  color: #f5222d !important;
+}

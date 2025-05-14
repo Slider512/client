@@ -1,0 +1,61 @@
+.task-list-container {
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.task-list-controls {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.task-list-error {
+  color: #f5222d;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.task-list-loading {
+  text-align: center;
+  padding: 16px;
+}
+
+.task-group {
+  margin-bottom: 24px;
+}
+
+.task-group-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.task-overdue {
+  background-color: #fff1f0 !important;
+}
+
+.task-overdue td {
+  color: #f5222d !important;
+}
+
+.task-list-content .ant-table {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.task-list-content .ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-weight: 500;
+}
+
+.task-list-content .ant-table-row {
+  cursor: pointer;
+}
+
+.task-list-content .ant-table-row:hover {
+  background-color: #f5f5f5;
+}

@@ -1,0 +1,31 @@
+.not-found-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  padding: 24px;
+}
+
+.not-found-page .ant-result {
+  max-width: 600px;
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.not-found-page .ant-result-title {
+  font-size: 48px;
+  color: #f5222d;
+}
+
+.not-found-page .ant-result-subtitle {
+  font-size: 18px;
+  color: #595959;
+}
+
+.not-found-page .ant-btn-primary {
+  border-radius: 4px;
+}

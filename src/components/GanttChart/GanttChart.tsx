@@ -5,8 +5,9 @@ import  {TaskBar}  from './TaskBar';
 import {TimelineHeader} from './TimelineHeader';
 import  { AddDependencyModal} from './AddDependencyModal';
 import { calculateDuration, formatDate } from '../../utils/dateUtils';
-import { useDrag, useDrop } from 'react-dnd';
-import '../../styles/GanttChart.css';
+import { useDrag, useDrop  } from 'react-dnd';
+import './GanttChart.css';
+
 
 interface GanttChartProps {
   tasks: Task[];
@@ -140,66 +141,66 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   };
 
   return (
-    <div 
-      ref={ganttRef}
-      className="gantt-chart-container"
-    >
-      drop(<div 
-        className="gantt-chart"
-        style={{ width: `${ganttWidth}px` }}
+      <div 
+        ref={ganttRef}
+        className="gantt-chart-container"
       >
-        <TimelineHeader 
-          startDate={startDate}
-          endDate={endDate}
-          dayWidth={dayWidth}
-          scale={scale}
-          onScaleChange={setScale}
-        />
+        <div 
+          ref={drop}
+          className="gantt-chart"
+          style={{ width: `${ganttWidth}px` }}
+        >
+          <TimelineHeader 
+            startDate={startDate}
+            endDate={endDate}
+            dayWidth={dayWidth}
+            scale={scale}
+            onScaleChange={setScale}
+          />
 
-        <div className="tasks-container">
-          {tasks.map(task => {
-            const position = calculateTaskPosition(task);
-            return (
-              <TaskBar
-                key={task.id}
-                task={task}
-                position={position}
-                isSelected={task.id === selectedTaskId}
-                onClick={() => onTaskSelect(task.id)}
-                onDoubleClick={() => {
-                  setDependencyModal({
-                    visible: true,
-                    fromTaskId: task.id
-                  });
-                }}
-              />
-            );
-          })}
+          <div className="tasks-container">
+            {tasks.map(task => {
+              const position = calculateTaskPosition(task);
+              return (
+                <TaskBar
+                  key={task.id}
+                  task={task}
+                  position={position}
+                  isSelected={task.id === selectedTaskId}
+                  onClick={() => onTaskSelect(task.id)}
+                  onDoubleClick={() => {
+                    setDependencyModal({
+                      visible: true,
+                      fromTaskId: task.id
+                    });
+                  }}
+                />
+              );
+            })}
 
-          {dependencies.map(dependency => {
-            const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
-            const toTask = tasks.find(t => t.id === dependency.toTaskId);
-            
-            if (!fromTask || !toTask) return null;
+            {dependencies.map(dependency => {
+              const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
+              const toTask = tasks.find(t => t.id === dependency.toTaskId);
+              
+              if (!fromTask || !toTask) return null;
 
-            const fromPos = calculateTaskPosition(fromTask);
-            const toPos = calculateTaskPosition(toTask);
+              const fromPos = calculateTaskPosition(fromTask);
+              const toPos = calculateTaskPosition(toTask);
 
-            return (
-              <DependencyArrow
-                key={`${dependency.fromTaskId}-${dependency.toTaskId}`}
-                fromX={fromPos.left + fromPos.width}
-                fromY={fromPos.top + fromPos.height / 2}
-                toX={toPos.left}
-                toY={toPos.top + toPos.height / 2}
-                type={dependency.type}
-                onDelete={() => onDeleteDependency(dependency.id)}
-              />
-            );
-          })}
+              return (
+                <DependencyArrow
+                  key={`${dependency.fromTaskId}-${dependency.toTaskId}`}
+                  fromX={fromPos.left + fromPos.width}
+                  fromY={fromPos.top + fromPos.height / 2}
+                  toX={toPos.left}
+                  toY={toPos.top + toPos.height / 2}
+                  type={dependency.type}
+                  onDelete={() => onDeleteDependency(dependency.id)}
+                />
+              );
+            })}
+          </div>
         </div>
-      </div>)
-
       <AddDependencyModal
         visible={dependencyModal.visible}
         fromTask={tasks.find(t => t.id === dependencyModal.fromTaskId)}

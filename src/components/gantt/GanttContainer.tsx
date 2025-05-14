@@ -10,7 +10,7 @@ import { applyFilters, applyGrouping, applySorting } from '../../utils/dataUtils
 import { useTasks }  from '../../hooks/useTasks';
 import  useDependencies  from '../../hooks/useDependencies';
 import { exportToExcel, exportToPDF } from '../../api/exportApi';
-import '../../styles/GanttContainer.css';
+import './GanttContainer.css';
 
 export const GanttContainer: React.FC = () => {
   // State management

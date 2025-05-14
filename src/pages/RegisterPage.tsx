@@ -1,122 +1,113 @@
-import { Form, Input, Button, message } from 'antd';
-import { useAuth } from '../auth/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { resendConfirmationApi } from '../api/authApi';
+import React, { useState } from 'react';
+import { Form, Input, Button, Typography, Alert, Space } from 'antd';
+import { MailOutlined, LockOutlined, HomeOutlined } from '@ant-design/icons';
+import { registerApi } from '../api/authApi';
+import { Link } from 'react-router-dom';
+import './RegisterPage.css';
+
+const { Title, Text } = Typography;
 
 const RegisterPage: React.FC = () => {
-  const { register } = useAuth();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const onFinish = async (values: { username: string; password: string; companyName: string; email: string }) => {
+  const onFinish = async (values: { email: string; password: string; confirmPassword: string; companyName: string }) => {
     setLoading(true);
+    setMessage(null);
+    setError(null);
     try {
-      await register(values.username, values.password, values.companyName, values.email);
-      setRegisteredEmail(values.email);
-      message.success('Registration successful! Please check your email to confirm your account.');
-    } catch (error: any) {
-      message.error(error.message || 'Registration failed');
+      const { email, password, companyName } = values;
+      const response = await registerApi({ email, password, companyName });
+      setMessage(response.message);
+    } catch (err: any) {
+      setError(err.message || 'Ошибка регистрации');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResend = async () => {
-    if (!registeredEmail) {
-      message.error('Please register first.');
-      return;
-    }
-    setResendLoading(true);
-    try {
-      await resendConfirmationApi(registeredEmail);
-      message.success('Confirmation email resent successfully.');
-    } catch (error: any) {
-      message.error(error.message || 'Failed to resend confirmation email.');
-    } finally {
-      setResendLoading(false);
-    }
-  };
-
   return (
-    <div style={{ maxWidth: 400, margin: '100px auto' }}>
-      <h2>Register</h2>
-      {registeredEmail ? (
-        <div style={{ textAlign: 'center' }}>
-          <p>Please check your email ({registeredEmail}) to confirm your account.</p>
-          <Button type="primary" onClick={handleResend} loading={resendLoading} style={{ marginTop: 16 }}>
-            Resend Confirmation Email
-          </Button>
-          <Button type="link" onClick={() => navigate('/login')} style={{ marginTop: 16 }} block>
-            Go to Login
-          </Button>
-        </div>
-      ) : (
-        <Form onFinish={onFinish}>
-          <Form.Item
-            name="companyName"
-            rules={[{ required: true, message: 'Please input your company name!' }]}
-          >
-            <Input placeholder="Company Name" />
-          </Form.Item>
-          <Form.Item
-            name="username"
-            rules={[{ required: true, message: 'Please input your username!' }]}
-          >
-            <Input placeholder="Username" />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[
-              { required: true, message: 'Please input your password!' },
-              { min: 8, message: 'Password must be at least 8 characters!' },
-              {
-                pattern: /^(?=.*\d)(?=.*[A-Z])(?=.*[!@#$%^&*]).*$/,
-                message: 'Password must contain a digit, uppercase letter, and special character!',
-              },
-            ]}
-          >
-            <Input.Password placeholder="Password" />
-          </Form.Item>
-          <Form.Item
-          name="confirmPassword"
-          rules={[
-            { required: true, message: 'Please confirm your password!' },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                if (!value || getFieldValue('password') === value) {
-                  return Promise.resolve();
-                }
-                return Promise.reject(new Error('Passwords do not match!'));
-              },
-            }),
-          ]}
+    <div className="register-container">
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Title level={2} style={{ textAlign: 'center' }}>
+          Регистрация
+        </Title>
+        {message && <Alert message={message} type="success" showIcon />}
+        {error && <Alert message={error} type="error" showIcon />}
+        <Form
+          name="register"
+          initialValues={{ email: '', password: '', confirmPassword: '', companyName: '' }}
+          onFinish={onFinish}
+          autoComplete="off"
+          layout="vertical"
         >
-          <Input.Password placeholder="Confirm Password" />
-        </Form.Item>
           <Form.Item
+            label="Email"
             name="email"
             rules={[
-              { required: true, message: 'Please input your email!' },
-              { type: 'email', message: 'Please enter a valid email!' },
+              { required: true, message: 'Пожалуйста, введите email!' },
+              { type: 'email', message: 'Введите корректный email!' },
             ]}
           >
-            <Input placeholder="Email" />
+            <Input prefix={<MailOutlined />} placeholder="Email" size="large" />
           </Form.Item>
+
+          <Form.Item
+            label="Пароль"
+            name="password"
+            rules={[
+              { required: true, message: 'Пожалуйста, введите пароль!' },
+              { min: 8, message: 'Пароль должен содержать минимум 8 символов!' },
+              {
+                pattern: /^(?=.*\d)(?=.*[A-Z])(?=.*[!@#$%^&*]).*$/,
+                message: 'Пароль должен содержать цифру, заглавную букву и спецсимвол!',
+              },
+            ]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="Пароль" size="large" />
+          </Form.Item>
+
+          <Form.Item
+            label="Подтверждение пароля"
+            name="confirmPassword"
+            dependencies={['password']}
+            rules={[
+              { required: true, message: 'Пожалуйста, подтвердите пароль!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('password') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Пароли не совпадают!'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="Подтверждение пароля" size="large" />
+          </Form.Item>
+
+          <Form.Item
+            label="Название компании"
+            name="companyName"
+            rules={[{ required: true, message: 'Пожалуйста, введите название компании!' }]}
+          >
+            <Input prefix={<HomeOutlined />} placeholder="Название компании" size="large" />
+          </Form.Item>
+
           <Form.Item>
-            <Button type="primary" htmlType="submit" block loading={loading}>
-              Register
+            <Button type="primary" htmlType="submit" loading={loading} block size="large">
+              Зарегистрироваться
             </Button>
           </Form.Item>
+
           <Form.Item>
-            <Button type="link" onClick={() => navigate('/login')} block>
-              Already have an account? Login
-            </Button>
+            <Text>
+              Уже есть аккаунт? <Link to="/login">Войти</Link>
+            </Text>
           </Form.Item>
         </Form>
-      )}
+      </Space>
     </div>
   );
 };

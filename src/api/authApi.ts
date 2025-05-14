@@ -1,15 +1,14 @@
 import api from './axios';
 
 export interface LoginCredentials {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterCredentials {
-  username: string;
+  email: string;
   password: string;
   companyName: string;
-  email: string;
 }
 
 export interface ConfirmEmailCredentials {
@@ -21,6 +20,15 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface ApiResponse {
+  message: string;
+}
+
+/**
+ * Авторизация пользователя по email и паролю.
+ * @param credentials Объект с email и паролем.
+ * @returns Объект с JWT-токеном.
+ */
 export const loginApi = async (credentials: LoginCredentials): Promise<LoginResponse> => {
   try {
     const response = await api.post<LoginResponse>('/api/auth/login', credentials);
@@ -31,29 +39,48 @@ export const loginApi = async (credentials: LoginCredentials): Promise<LoginResp
   }
 };
 
-export const registerApi = async (credentials: RegisterCredentials): Promise<void> => {
+/**
+ * Регистрация нового пользователя.
+ * @param credentials Объект с email, паролем и названием компании.
+ * @returns Объект с сообщением от сервера.
+ */
+export const registerApi = async (credentials: RegisterCredentials): Promise<ApiResponse> => {
   try {
-    await api.post('/api/auth/register', credentials);
+    const response = await api.post<ApiResponse>('/api/auth/register', credentials);
+    return response.data;
   } catch (error: any) {
     console.error('Register API error:', error);
     throw new Error(error.response?.data?.message || 'Registration failed');
   }
 };
 
-export const confirmEmailApi = async (userId: string, token: string): Promise<void> => {
+/**
+ * Повторная отправка письма подтверждения.
+ * @param email Email пользователя.
+ * @returns Объект с сообщением от сервера.
+ */
+export const resendConfirmationApi = async (email: string): Promise<ApiResponse> => {
   try {
-    await api.post('/api/auth/confirm-email', { userId, token });
-  } catch (error: any) {
-    console.error('Confirm Email API error:', error);
-    throw new Error(error.response?.data?.message || 'Email confirmation failed');
-  }
-};
-
-export const resendConfirmationApi = async (email: string): Promise<void> => {
-  try {
-    await api.post('/api/auth/resend-confirmation', { email });
+    const response = await api.post<ApiResponse>('/api/auth/resend-confirmation', { email });
+    return response.data;
   } catch (error: any) {
     console.error('Resend Confirmation API error:', error);
     throw new Error(error.response?.data?.message || 'Failed to resend confirmation email');
+  }
+};
+
+/**
+ * Подтверждение email пользователя.
+ * @param userId ID пользователя.
+ * @param token Токен подтверждения.
+ * @returns Объект с сообщением от сервера.
+ */
+export const confirmEmailApi = async (userId: string, token: string): Promise<ApiResponse> => {
+  try {
+    const response = await api.post<ApiResponse>('/api/auth/confirm-email', { userId, token });
+    return response.data;
+  } catch (error: any) {
+    console.error('Confirm Email API error:', error);
+    throw new Error(error.response?.data?.message || 'Email confirmation failed');
   }
 };

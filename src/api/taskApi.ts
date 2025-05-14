@@ -1,31 +1,41 @@
+import api from './axios';
 import { Task } from '../models';
 
-const API_URL = 'http://localhost:5000/api/tasks';
-
 export const fetchTasks = async (): Promise<Task[]> => {
-  const response = await fetch(API_URL);
-  if (!response.ok) throw new Error('Failed to fetch tasks');
-  return response.json();
+  try {
+    const response = await api.get<Task[]>('/api/tasks');
+    return response.data;
+  } catch (error: any) {
+    console.error('Fetch Tasks API error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch tasks');
+  }
 };
 
 export const createTask = async (task: Omit<Task, 'id'>): Promise<Task> => {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(task)
-  });
-  return response.json();
+  try {
+    const response = await api.post<Task>('/api/tasks', task);
+    return response.data;
+  } catch (error: any) {
+    console.error('Create Task API error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to create task');
+  }
 };
 
 export const updateTask = async (task: Task): Promise<Task> => {
-  const response = await fetch(`${API_URL}/${task.id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(task)
-  });
-  return response.json();
+  try {
+    const response = await api.put<Task>(`/api/tasks/${task.id}`, task);
+    return response.data;
+  } catch (error: any) {
+    console.error('Update Task API error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to update task');
+  }
 };
 
 export const deleteTask = async (id: string): Promise<void> => {
-  await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+  try {
+    await api.delete(`/api/tasks/${id}`);
+  } catch (error: any) {
+    console.error('Delete Task API error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to delete task');
+  }
 };

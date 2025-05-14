@@ -1,40 +1,4 @@
-/*
-export interface LoginCredentials {
-  username: string;
-  password: string;
-}
-
-const API_URL = 'http://localhost:5000/api/auth';
-
-
-export interface LoginResponse {
-  token: string;
-}
-
-export const loginApi = async (credentials: LoginCredentials): Promise<LoginResponse> => {
-  try {
-    const response = await fetch(`${API_URL}/login`, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-
-    if (!response.ok) {
-      throw new Error('Login failed');
-    }
-
-    const data: LoginResponse = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Login API error:', error);
-    throw error;
-  }
-};
-*/
-import { config } from '../config';
+import api from './axios';
 
 export interface LoginCredentials {
   username: string;
@@ -59,81 +23,37 @@ export interface LoginResponse {
 
 export const loginApi = async (credentials: LoginCredentials): Promise<LoginResponse> => {
   try {
-    const response = await fetch(`${config.baseUrl}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-
-    if (!response.ok) {
-      throw new Error('Login failed');
-    }
-
-    const data: LoginResponse = await response.json();
-    return data;
-  } catch (error) {
+    const response = await api.post<LoginResponse>('/api/auth/login', credentials);
+    return response.data;
+  } catch (error: any) {
     console.error('Login API error:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Login failed');
   }
 };
 
 export const registerApi = async (credentials: RegisterCredentials): Promise<void> => {
   try {
-    const response = await fetch(`${config.baseUrl}/api/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Registration failed');
-    }
-  } catch (error) {
+    await api.post('/api/auth/register', credentials);
+  } catch (error: any) {
     console.error('Register API error:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Registration failed');
   }
 };
 
 export const confirmEmailApi = async (userId: string, token: string): Promise<void> => {
   try {
-    const response = await fetch(`${config.baseUrl}/api/auth/confirm-email`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId, token }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Email confirmation failed');
-    }
-  } catch (error) {
+    await api.post('/api/auth/confirm-email', { userId, token });
+  } catch (error: any) {
     console.error('Confirm Email API error:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Email confirmation failed');
   }
 };
 
 export const resendConfirmationApi = async (email: string): Promise<void> => {
   try {
-    const response = await fetch(`${config.baseUrl}/api/auth/resend-confirmation`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to resend confirmation email');
-    }
-  } catch (error) {
+    await api.post('/api/auth/resend-confirmation', { email });
+  } catch (error: any) {
     console.error('Resend Confirmation API error:', error);
-    throw error;
+    throw new Error(error.response?.data?.message || 'Failed to resend confirmation email');
   }
 };

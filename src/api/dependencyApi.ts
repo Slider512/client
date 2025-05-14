@@ -1,22 +1,31 @@
+import api from './axios';
 import { Dependency } from '../models';
 
-const API_URL = 'http://localhost:5000/api/dependencies';
-
 export const fetchDependencies = async (): Promise<Dependency[]> => {
-  const response = await fetch(API_URL);
-  return response.json();
+  try {
+    const response = await api.get<Dependency[]>('/api/dependencies');
+    return response.data;
+  } catch (error: any) {
+    console.error('Fetch Dependencies API error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to fetch dependencies');
+  }
 };
 
 export const createDependency = async (dep: Omit<Dependency, 'id'>): Promise<Dependency> => {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dep)
-  });
-  return response.json();
+  try {
+    const response = await api.post<Dependency>('/api/dependencies', dep);
+    return response.data;
+  } catch (error: any) {
+    console.error('Create Dependency API error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to create dependency');
+  }
 };
 
 export const deleteDependency = async (id: string): Promise<void> => {
-  await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+  try {
+    await api.delete(`/api/dependencies/${id}`);
+  } catch (error: any) {
+    console.error('Delete Dependency API error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to delete dependency');
+  }
 };

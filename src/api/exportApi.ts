@@ -3,8 +3,7 @@ import { saveAs } from 'file-saver';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { Task, Dependency } from '../models';
-
-const API_BASE_URL = '/api/export';
+import api from './axios';
 
 export const exportToExcel = async (
   tasks: Task[],
@@ -159,17 +158,13 @@ export const exportToServer = async (
   tasks: Task[],
   format: 'excel' | 'pdf'
 ): Promise<Blob> => {
-  const response = await fetch(`${API_BASE_URL}/${format}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ tasks })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Export failed: ${response.statusText}`);
+  try {
+    const response = await api.post(`/api/export/${format}`, { tasks }, {
+      responseType: 'blob'
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Server export failed:', error);
+    throw new Error(error.response?.data?.message || `Export to ${format} failed`);
   }
-
-  return response.blob();
 };

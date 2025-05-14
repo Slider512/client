@@ -2,15 +2,20 @@ import React, { useState } from 'react';
 import { Form, Input, Button, Typography, Alert, Space } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../auth/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
 import './LoginPage.css';
 
 const { Title, Text } = Typography;
 
 const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const { login, error } = useAuth();
+  const { login, error, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+   // Перенаправление на корневую страницу, если пользователь уже авторизован
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);

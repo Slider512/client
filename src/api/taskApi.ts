@@ -1,6 +1,36 @@
 import api from './axios';
 import { Task } from '../models';
 
+// Функция для получения токена из localStorage
+const getAuthToken = (): string | null => {
+  return localStorage.getItem('authToken');
+};
+
+// Интерсептор для добавления токена в заголовок Authorization
+api.interceptors.request.use(
+  (config) => {
+    const token = getAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Интерсептор для обработки ошибок авторизации
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.error('Unauthorized: Please log in again.');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const fetchTasks = async (): Promise<Task[]> => {
   try {
     const response = await api.get<Task[]>('/api/tasks');

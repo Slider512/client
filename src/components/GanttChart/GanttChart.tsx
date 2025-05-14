@@ -1,13 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Task, Dependency, DependencyType } from '../../models';
-import  {DependencyArrow}  from './DependencyArrow';
-import  {TaskBar}  from './TaskBar';
-import {TimelineHeader} from './TimelineHeader';
-import  { AddDependencyModal} from './AddDependencyModal';
+import { DependencyArrow } from './DependencyArrow';
+import { TaskBar } from './TaskBar';
+import { TimelineHeader } from './TimelineHeader';
+import { AddDependencyModal } from './AddDependencyModal';
 import { calculateDuration, formatDate } from '../../utils/dateUtils';
-import { useDrag, useDrop  } from 'react-dnd';
+import { useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import './GanttChart.css';
-
 
 interface GanttChartProps {
   tasks: Task[];
@@ -26,7 +25,6 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   onAddDependency,
   onDeleteDependency
 }) => {
-  // Refs and state
   const ganttRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number>(1);
   const [startDate, setStartDate] = useState<Date>(() => {
@@ -50,31 +48,27 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     toTaskId?: string;
   }>({ visible: false });
 
-  // Calculate dimensions
   const daysCount = calculateDuration(startDate.toISOString(), endDate.toISOString());
-  const dayWidth:number = 40 * scale;
+  const dayWidth: number = 40 * scale;
   const rowHeight = 40;
   const ganttWidth = daysCount * dayWidth;
 
-  // Handle dependency creation
   const handleAddDependency = async (type: DependencyType) => {
     if (!dependencyModal.fromTaskId || !dependencyModal.toTaskId) return;
-    
     const success = await onAddDependency(
       dependencyModal.fromTaskId,
       dependencyModal.toTaskId,
       type
     );
-    
     if (success) {
       setDependencyModal({ visible: false });
     }
   };
 
-  // Drag and drop for tasks
-  const [, drop] = useDrop({
+  // Настройка drop с использованием useDrop
+  const [{ isOver }, drop] = useDrop({
     accept: 'TASK',
-    drop: (item: { id: string }, monitor) => {
+    drop: (item: { id: string }, monitor: DropTargetMonitor) => {
       if (!dragOverTaskId) return;
       setDependencyModal({
         visible: true,
@@ -85,24 +79,30 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     },
     hover: (item, monitor) => {
       if (!ganttRef.current) return;
-      
       const clientOffset = monitor.getClientOffset();
       if (!clientOffset) return;
-      
       const hoveredElement = document.elementFromPoint(
         clientOffset.x,
         clientOffset.y
       )?.closest('.task-bar');
-      
       if (hoveredElement) {
         setDragOverTaskId(hoveredElement.getAttribute('data-task-id'));
       } else {
         setDragOverTaskId(null);
       }
-    }
+    },
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
   });
 
-  // Auto-scroll when dragging near edges
+  // Callback ref для передачи DOM-элемента в drop
+  const dropRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      drop(node);
+    }
+  }, [drop]);
+
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey) {
@@ -119,7 +119,6 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     };
   }, []);
 
-  // Calculate task positions
   const calculateTaskPosition = (task: Task) => {
     const start = new Date(task.startDate);
     const end = new Date(task.endDate);
@@ -141,66 +140,54 @@ export const GanttChart: React.FC<GanttChartProps> = ({
   };
 
   return (
-      <div 
-        ref={ganttRef}
-        className="gantt-chart-container"
-      >
-        <div 
-          ref={drop}
-          className="gantt-chart"
-          style={{ width: `${ganttWidth}px` }}
-        >
-          <TimelineHeader 
-            startDate={startDate}
-            endDate={endDate}
-            dayWidth={dayWidth}
-            scale={scale}
-            onScaleChange={setScale}
-          />
-
-          <div className="tasks-container">
-            {tasks.map(task => {
-              const position = calculateTaskPosition(task);
-              return (
-                <TaskBar
-                  key={task.id}
-                  task={task}
-                  position={position}
-                  isSelected={task.id === selectedTaskId}
-                  onClick={() => onTaskSelect(task.id)}
-                  onDoubleClick={() => {
-                    setDependencyModal({
-                      visible: true,
-                      fromTaskId: task.id
-                    });
-                  }}
-                />
-              );
-            })}
-
-            {dependencies.map(dependency => {
-              const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
-              const toTask = tasks.find(t => t.id === dependency.toTaskId);
-              
-              if (!fromTask || !toTask) return null;
-
-              const fromPos = calculateTaskPosition(fromTask);
-              const toPos = calculateTaskPosition(toTask);
-
-              return (
-                <DependencyArrow
-                  key={`${dependency.fromTaskId}-${dependency.toTaskId}`}
-                  fromX={fromPos.left + fromPos.width}
-                  fromY={fromPos.top + fromPos.height / 2}
-                  toX={toPos.left}
-                  toY={toPos.top + toPos.height / 2}
-                  type={dependency.type}
-                  onDelete={() => onDeleteDependency(dependency.id)}
-                />
-              );
-            })}
-          </div>
+    <div ref={ganttRef} className="gantt-chart-container">
+      <div ref={dropRef} className="gantt-chart" style={{ width: `${ganttWidth}px` }}>
+        <TimelineHeader
+          startDate={startDate}
+          endDate={endDate}
+          dayWidth={dayWidth}
+          scale={scale}
+          onScaleChange={setScale}
+        />
+        <div className="tasks-container">
+          {tasks.map(task => {
+            const position = calculateTaskPosition(task);
+            return (
+              <TaskBar
+                key={task.id}
+                task={task}
+                position={position}
+                isSelected={task.id === selectedTaskId}
+                onClick={() => onTaskSelect(task.id)}
+                onDoubleClick={() => {
+                  setDependencyModal({
+                    visible: true,
+                    fromTaskId: task.id
+                  });
+                }}
+              />
+            );
+          })}
+          {dependencies.map(dependency => {
+            const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
+            const toTask = tasks.find(t => t.id === dependency.toTaskId);
+            if (!fromTask || !toTask) return null;
+            const fromPos = calculateTaskPosition(fromTask);
+            const toPos = calculateTaskPosition(toTask);
+            return (
+              <DependencyArrow
+                key={`${dependency.fromTaskId}-${dependency.toTaskId}`}
+                fromX={fromPos.left + fromPos.width}
+                fromY={fromPos.top + fromPos.height / 2}
+                toX={toPos.left}
+                toY={toPos.top + toPos.height / 2}
+                type={dependency.type}
+                onDelete={() => onDeleteDependency(dependency.id)}
+              />
+            );
+          })}
         </div>
+      </div>
       <AddDependencyModal
         visible={dependencyModal.visible}
         fromTask={tasks.find(t => t.id === dependencyModal.fromTaskId)}

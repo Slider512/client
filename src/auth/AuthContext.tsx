@@ -1,16 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { loginApi, registerApi, resendConfirmationApi, confirmEmailApi, LoginCredentials, RegisterCredentials, LoginResponse } from '../api/authApi';
+import { loginApi, registerApi, resendConfirmationApi, confirmEmailApi, LoginCredentials, RegisterCredentials, LoginResponse, ApiResponse } from '../api/authApi';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   token: string | null;
   user: { email: string } | null;
   login: (credentials: LoginCredentials) => Promise<void>;
-  register: (credentials: RegisterCredentials) => Promise<void>;
+  register: (credentials: RegisterCredentials) => Promise<ApiResponse>;
   logout: () => void;
-  resendConfirmation: (email: string) => Promise<void>;
-  confirmEmail: (userId: string, token: string) => Promise<void>;
+  resendConfirmation: (email: string) => Promise<ApiResponse>;
+  confirmEmail: (userId: string, token: string) => Promise<ApiResponse>;
   error: string | null;
+  message: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,14 +21,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
-  // Initialize auth state from localStorage
+  // Инициализация состояния аутентификации из localStorage
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken');
     const storedEmail = localStorage.getItem('userEmail');
     if (storedToken && storedEmail) {
       try {
-        // Basic token validation (you may want to verify with backend)
         setToken(storedToken);
         setUser({ email: storedEmail });
         setIsAuthenticated(true);
@@ -39,13 +40,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
       setError(null);
+      setMessage(null);
       const response: LoginResponse = await loginApi(credentials);
       const { token } = response;
 
-      // Decode token to get email (assuming email is in ClaimTypes.Email)
+      // Декодирование токена для получения email
       const decoded = parseJwt(token);
       const email = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
 
@@ -60,10 +62,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const register = async (credentials: RegisterCredentials) => {
+  const register = async (credentials: RegisterCredentials): Promise<ApiResponse> => {
     try {
       setError(null);
-      await registerApi(credentials);
+      setMessage(null);
+      const response = await registerApi(credentials);
+      setMessage(response.message);
+      return response;
     } catch (err: any) {
       setError(err.message || 'Registration failed');
       throw err;
@@ -77,29 +82,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
     setIsAuthenticated(false);
     setError(null);
+    setMessage(null);
   };
 
-  const resendConfirmation = async (email: string) => {
+  const resendConfirmation = async (email: string): Promise<ApiResponse> => {
     try {
       setError(null);
-      await resendConfirmationApi(email);
+      setMessage(null);
+      const response = await resendConfirmationApi(email);
+      setMessage(response.message);
+      return response;
     } catch (err: any) {
       setError(err.message || 'Failed to resend confirmation email');
       throw err;
     }
   };
 
-  const confirmEmail = async (userId: string, token: string) => {
+  const confirmEmail = async (userId: string, token: string): Promise<ApiResponse> => {
     try {
       setError(null);
-      await confirmEmailApi(userId, token);
+      setMessage(null);
+      const response = await confirmEmailApi(userId, token);
+      setMessage(response.message);
+      return response;
     } catch (err: any) {
       setError(err.message || 'Email confirmation failed');
       throw err;
     }
   };
 
-  // Helper function to decode JWT
+  // Вспомогательная функция для декодирования JWT
   const parseJwt = (token: string) => {
     try {
       const base64Url = token.split('.')[1];
@@ -126,6 +138,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     resendConfirmation,
     confirmEmail,
     error,
+    message,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

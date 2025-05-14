@@ -22,7 +22,6 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>  
         <DndProvider backend={HTML5Backend}>
-
           <ConfigProvider
             theme={{
               token: {

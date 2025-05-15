@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Statistic, Typography } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import { useTasks } from '../hooks/useTasks';
 import { useAuth } from '../auth/AuthContext';
+import ProjectSelector from '../components/ProjectSelector';
 import TaskActivityChart from '../components/dashboard/TaskActivityChart';
 import TaskStatusPie from '../components/dashboard/TaskStatusPie';
 import RecentTasksList from '../components/dashboard/RecentTasksList';
 import './DashboardPage.css';
+import { fetchTasks } from '../api/taskApi';
+import { message } from 'antd';
 
 const { Title } = Typography;
 
 const DashboardPage: React.FC = () => {
-  const { tasks } = useTasks();
+  const { tasks, setTasks } = useTasks();
   const { login } = useAuth();
-
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   // Статистика
   const completedTasks = tasks.filter(t => t.status === 'Completed').length;
   const inProgressTasks = tasks.filter(t => t.status === 'In Progress').length;
@@ -22,10 +25,31 @@ const DashboardPage: React.FC = () => {
     new Date(t.endDate) < new Date()
   ).length;
 
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const data = await fetchTasks();
+        // Фильтрация задач по projectId
+        const filteredTasks = selectedProjectId
+          ? data.filter((task) => task.projectId === selectedProjectId)
+          : data;
+        setTasks(filteredTasks);
+      } catch (error) {
+        message.error('Failed to load tasks');
+      }
+    };
+    loadTasks();
+  }, [selectedProjectId]);
+
   return (
     <div className="dashboard-page">
       <Title level={2}>Dashboard</Title>
       <p>Welcome back, {login?.name}!</p>
+
+      <ProjectSelector
+        selectedProjectId={selectedProjectId}
+        onSelectProject={setSelectedProjectId}
+      />
 
       {/* Статистика */}
       <Row gutter={[16, 16]} className="stats-row">

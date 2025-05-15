@@ -8,6 +8,7 @@ export interface Task  {
   assignee?: string;
   updatedAt?:string;
   createdAt:string;
+  projectId:string;
   status?: 'Not Started' | 'In Progress' | 'Completed';
   priority?: 'Low' | 'Medium' | 'High';
   dependencies?: string[];

@@ -73,9 +73,11 @@ api.interceptors.response.use(
   }
 );
 
-export const fetchTasks = async (): Promise<Task[]> => {
+export const fetchTasks = async (projectId?: string): Promise<Task[]> => {
   try {
-    const response = await api.get<Task[]>('/api/tasks');
+    const response = await api.get<Task[]>('/api/tasks', {
+      params: { projectId },
+    });
     return response.data;
   } catch (error: any) {
     console.error('Fetch Tasks API error:', error);

@@ -14,9 +14,9 @@ import { message } from 'antd';
 const { Title } = Typography;
 
 const DashboardPage: React.FC = () => {
-  const { tasks, setTasks } = useTasks();
+  const { tasks, loading, error, fetchTasksByProject } = useTasks();
   const { login } = useAuth();
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
   // Статистика
   const completedTasks = tasks.filter(t => t.status === 'Completed').length;
   const inProgressTasks = tasks.filter(t => t.status === 'In Progress').length;
@@ -25,21 +25,10 @@ const DashboardPage: React.FC = () => {
     new Date(t.endDate) < new Date()
   ).length;
 
-  useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        const data = await fetchTasks();
-        // Фильтрация задач по projectId
-        const filteredTasks = selectedProjectId
-          ? data.filter((task) => task.projectId === selectedProjectId)
-          : data;
-        setTasks(filteredTasks);
-      } catch (error) {
-        message.error('Failed to load tasks');
-      }
-    };
-    loadTasks();
-  }, [selectedProjectId]);
+  // Загрузка задач при изменении проекта
+  React.useEffect(() => {
+    fetchTasksByProject(selectedProjectId);
+  }, [selectedProjectId, fetchTasksByProject]);
 
   return (
     <div className="dashboard-page">

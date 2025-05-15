@@ -5,8 +5,8 @@ import { fetchProjects, createProject, deleteProject } from '../api/projectApi';
 import { Project } from '../models/Project';
 
 interface ProjectSelectorProps {
-  selectedProjectId: string | null;
-  onSelectProject: (projectId: string | null) => void;
+  selectedProjectId: string | undefined;
+  onSelectProject: (projectId: string | undefined) => void;
 }
 
 const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjectId, onSelectProject }) => {
@@ -46,7 +46,7 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({ selectedProjectId, on
       await deleteProject(id);
       setProjects(projects.filter((p) => p.id !== id));
       if (selectedProjectId === id) {
-        onSelectProject(null);
+        onSelectProject(undefined);
       }
       message.success('Project deleted successfully');
     } catch (error) {

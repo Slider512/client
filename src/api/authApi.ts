@@ -18,6 +18,7 @@ export interface ConfirmEmailCredentials {
 
 export interface LoginResponse {
   token: string;
+  refreshToken: string;
 }
 
 export interface ApiResponse {
@@ -82,5 +83,20 @@ export const confirmEmailApi = async (userId: string, token: string): Promise<Ap
   } catch (error: any) {
     console.error('Confirm Email API error:', error);
     throw new Error(error.response?.data?.message || 'Email confirmation failed');
+  }
+};
+
+/**
+ * Обновление access-токена с использованием refresh-токена.
+ * @param refreshToken Refresh-токен.
+ * @returns Объект с новым JWT-токеном и refresh-токеном.
+ */
+export const refreshTokenApi = async (refreshToken: string): Promise<LoginResponse> => {
+  try {
+    const response = await api.post<LoginResponse>('/api/auth/refresh-token', { refreshToken });
+    return response.data;
+  } catch (error: any) {
+    console.error('Refresh Token API error:', error);
+    throw new Error(error.response?.data?.message || 'Failed to refresh token');
   }
 };

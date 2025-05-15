@@ -1,15 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { loginApi, registerApi, resendConfirmationApi, confirmEmailApi, LoginCredentials, RegisterCredentials, LoginResponse, ApiResponse } from '../api/authApi';
+import { loginApi, registerApi, resendConfirmationApi, confirmEmailApi, refreshTokenApi, LoginCredentials, RegisterCredentials, LoginResponse, ApiResponse } from '../api/authApi';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   token: string | null;
+  refreshToken: string | null;
   user: { email: string } | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<ApiResponse>;
   logout: () => void;
   resendConfirmation: (email: string) => Promise<ApiResponse>;
   confirmEmail: (userId: string, token: string) => Promise<ApiResponse>;
+  callrefreshToken: () => Promise<void>;
   error: string | null;
   message: string | null;
 }
@@ -19,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [user, setUser] = useState<{ email: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -26,15 +29,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Инициализация состояния аутентификации из localStorage
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken');
+    const storedRefreshToken = localStorage.getItem('refreshToken');
     const storedEmail = localStorage.getItem('userEmail');
-    if (storedToken && storedEmail) {
+    if (storedToken && storedRefreshToken && storedEmail) {
       try {
         setToken(storedToken);
+        setRefreshToken(storedRefreshToken);
         setUser({ email: storedEmail });
         setIsAuthenticated(true);
       } catch (err) {
         console.error('Invalid stored token:', err);
         localStorage.removeItem('authToken');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('userEmail');
       }
     }
@@ -45,15 +51,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setError(null);
       setMessage(null);
       const response: LoginResponse = await loginApi(credentials);
-      const { token } = response;
+      const { token, refreshToken } = response;
 
       // Декодирование токена для получения email
       const decoded = parseJwt(token);
       const email = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
 
       localStorage.setItem('authToken', token);
+      localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('userEmail', email);
       setToken(token);
+      setRefreshToken(refreshToken);
       setUser({ email });
       setIsAuthenticated(true);
     } catch (err: any) {
@@ -77,8 +85,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('userEmail');
     setToken(null);
+    setRefreshToken(null);
     setUser(null);
     setIsAuthenticated(false);
     setError(null);
@@ -111,6 +121,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const callrefreshToken = async (): Promise<void> => {
+    try {
+      setError(null);
+      setMessage(null);
+      const storedRefreshToken = localStorage.getItem('refreshToken');
+      if (!storedRefreshToken) {
+        throw new Error('No refresh token available');
+      }
+      const response = await refreshTokenApi(storedRefreshToken);
+      const { token, refreshToken: newRefreshToken } = response;
+
+      const decoded = parseJwt(token);
+      const email = decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
+
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      localStorage.setItem('userEmail', email);
+      setToken(token);
+      setRefreshToken(newRefreshToken);
+      setUser({ email });
+      setIsAuthenticated(true);
+    } catch (err: any) {
+      setError(err.message || 'Failed to refresh token');
+      logout(); // Очищаем состояние при неуспешном обновлении
+      throw err;
+    }
+  };
+
   // Вспомогательная функция для декодирования JWT
   const parseJwt = (token: string) => {
     try {
@@ -131,12 +169,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const value: AuthContextType = {
     isAuthenticated,
     token,
+    refreshToken,
     user,
     login,
     register,
     logout,
     resendConfirmation,
     confirmEmail,
+    callrefreshToken,
     error,
     message,
   };

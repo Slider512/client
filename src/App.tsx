@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import ProtectedRoute from './auth/ProtectedRoute';
@@ -16,9 +16,11 @@ import store from './store';
 import './styles/App.css';
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { DndProvider  } from 'react-dnd';
+import { useEffect } from 'react';
 
 // Главный компонент приложения
 const App: React.FC = () => {
+
   return (
     <Provider store={store}>  
         <DndProvider backend={HTML5Backend}>
@@ -43,7 +45,19 @@ const App: React.FC = () => {
 // Компонент маршрутизации
 const AppRoutes: React.FC = () => {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const authContext = useAuth();
 
+  // Передаём authContext и navigate в глобальный объект
+  useEffect(() => {
+    window.__authContext = authContext;
+    window.__navigate = navigate;
+    return () => {
+      delete window.__authContext;
+      delete window.__navigate;
+    };
+  }, [authContext, navigate]);
+  
   return (
     <Routes>
       {/* Публичные маршруты (без Layout) */}
@@ -93,3 +107,11 @@ const AppRoutes: React.FC = () => {
 };
 
 export default App;
+
+// Объявляем глобальные переменные для TypeScript
+declare global {
+  interface Window {
+    __authContext?: ReturnType<typeof useAuth>;
+    __navigate?: ReturnType<typeof useNavigate>;
+  }
+}

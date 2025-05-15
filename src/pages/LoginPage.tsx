@@ -12,7 +12,7 @@ const LoginPage: React.FC = () => {
   const { login, error, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-   // Перенаправление на корневую страницу, если пользователь уже авторизован
+  // Перенаправление на корневую страницу, если пользователь уже авторизован
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       await login({ email: values.email, password: values.password });
-      navigate('/'); // Redirect to dashboard after successful login
+      navigate('/'); // Перенаправление после успешного логина
     } catch (err) {
       console.error('Login error:', err);
     } finally {
@@ -33,7 +33,7 @@ const LoginPage: React.FC = () => {
     <div className="login-container">
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Title level={2} style={{ textAlign: 'center' }}>
-          Login
+          Вход
         </Title>
         {error && <Alert message={error} type="error" showIcon />}
         <Form
@@ -47,35 +47,35 @@ const LoginPage: React.FC = () => {
             label="Email"
             name="email"
             rules={[
-              { required: true, message: 'Please input your email!' },
-              { type: 'email', message: 'Please enter a valid email!' },
+              { required: true, message: 'Пожалуйста, введите email!' },
+              { type: 'email', message: 'Пожалуйста, введите корректный email!' },
             ]}
           >
             <Input prefix={<UserOutlined />} placeholder="Email" size="large" />
           </Form.Item>
 
           <Form.Item
-            label="Password"
+            label="Пароль"
             name="password"
-            rules={[{ required: true, message: 'Please input your password!' }]}
+            rules={[{ required: true, message: 'Пожалуйста, введите пароль!' }]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder="Password" size="large" />
+            <Input.Password prefix={<LockOutlined />} placeholder="Пароль" size="large" />
           </Form.Item>
 
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} block size="large">
-              Log In
+              Войти
             </Button>
           </Form.Item>
 
           <Form.Item>
             <Text>
-              Don't have an account? <Link to="/register">Register</Link>
+              Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
             </Text>
           </Form.Item>
           <Form.Item>
             <Text>
-              Need to confirm your email? <Link to="/resend-confirmation">Resend Confirmation</Link>
+              Нужно подтвердить email? <Link to="/resend-confirmation">Отправить письмо повторно</Link>
             </Text>
           </Form.Item>
         </Form>

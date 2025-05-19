@@ -15,7 +15,7 @@ interface TaskListProps {
 }
 
 const TaskList: React.FC<TaskListProps> = ({ className }) => {
-  const { tasks, loading, error, deleteTask, setSelectedTaskId, getTasksByStatus, getTasksByAssignee } = useTasks();
+  const { tasks, loading, error, removeTask } = useTasks();
   const [searchText, setSearchText] = useState('');
   const [filterStatus, setFilterStatus] = useState<string | undefined>(undefined);
   const [filterAssignee, setFilterAssignee] = useState<string | undefined>(undefined);
@@ -32,16 +32,6 @@ const TaskList: React.FC<TaskListProps> = ({ className }) => {
       result = result.filter(task =>
         task.title.toLowerCase().includes(searchText.toLowerCase())
       );
-    }
-
-    // Фильтрация по статусу
-    if (filterStatus) {
-      result = getTasksByStatus(filterStatus);
-    }
-
-    // Фильтрация по исполнителю
-    if (filterAssignee) {
-      result = getTasksByAssignee(filterAssignee);
     }
 
     // Сортировка
@@ -64,7 +54,7 @@ const TaskList: React.FC<TaskListProps> = ({ className }) => {
     }
 
     return result;
-  }, [tasks, searchText, filterStatus, filterAssignee, sortField, sortOrder, getTasksByStatus, getTasksByAssignee]);
+  }, [tasks, searchText, filterStatus, filterAssignee, sortField, sortOrder]);
 
   // Группировка задач
   const groupedTasks = useMemo(() => {
@@ -147,14 +137,10 @@ const TaskList: React.FC<TaskListProps> = ({ className }) => {
       width: 120,
       render: (_: any, record: Task) => (
         <Space>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => setSelectedTaskId(record.id)}
-            size="small"
-          />
+          
           <Popconfirm
             title="Are you sure to delete this task?"
-            onConfirm={() => deleteTask(record.id)}
+            onConfirm={() => removeTask(record.id)}
             okText="Yes"
             cancelText="No"
           >
@@ -247,9 +233,9 @@ const TaskList: React.FC<TaskListProps> = ({ className }) => {
                     ? 'task-overdue'
                     : ''
                 }
-                onRow={(record) => ({
+                /*onRow={(record) => ({
                   onClick: () => setSelectedTaskId(record.id),
-                })}
+                })}*/
               />
             </div>
           ))}

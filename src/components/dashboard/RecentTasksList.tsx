@@ -13,7 +13,7 @@ interface RecentTasksListProps {
 }
 
 const RecentTasksList: React.FC<RecentTasksListProps> = ({ className, limit = 5 }) => {
-  const { tasks, loading, error, setSelectedTaskId } = useTasks();
+  const { tasks, loading, error } = useTasks();
 
   // Фильтрация и сортировка последних задач
   const recentTasks = React.useMemo(() => {
@@ -41,7 +41,7 @@ const RecentTasksList: React.FC<RecentTasksListProps> = ({ className, limit = 5 
                   key="view"
                   type="link"
                   icon={<EyeOutlined />}
-                  onClick={() => setSelectedTaskId(task.id)}
+                  //onClick={() => setSelectedTaskId(task.id)}
                 >
                   View
                 </Button>,

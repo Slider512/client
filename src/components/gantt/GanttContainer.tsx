@@ -14,9 +14,10 @@ import './GanttContainer.css';
 
 export const GanttContainer: React.FC = () => {
   // State management
-  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask } = useTasks();
+  const { tasks, loading: tasksLoading, addTask, editTask, removeTask } = useTasks();
   const { dependencies, addDependency, removeDependency } = useDependencies();
   const [selectedTaskId, setSelectedTaskId] = useState<string|undefined>(undefined);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
   const [groupBy, setGroupBy] = useState<string>('none');
   const [filters, setFilters] = useState({
     assignee: '',
@@ -51,8 +52,8 @@ export const GanttContainer: React.FC = () => {
         updatedTasks[taskIndex] = { ...updatedTasks[taskIndex], ...change.newCell };
       }
     });
-    updateTask(updatedTasks.find(t => t.id === changes[0].rowId)!);
-  }, [tasks, updateTask]);
+    editTask(updatedTasks.find(t => t.id === changes[0].rowId)!);
+  }, [tasks, editTask]);
 
   const handleAddDependency = useCallback(async (fromTaskId: string, toTaskId: string, type: DependencyType) => {
     const result = await addDependency({ fromTaskId, toTaskId, type });
@@ -125,6 +126,7 @@ export const GanttContainer: React.FC = () => {
         //onExportPDF={handleExportPDF}
         onAddTask={() => addTask({
           title: 'New Task',
+          projectId: selectedProjectId??'',
           //type: 'text',
           startDate: new Date().toISOString(),
           endDate: new Date(Date.now() + 86400000).toISOString(),
